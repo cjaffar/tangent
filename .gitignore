@@ -4,3 +4,4 @@ bower_components/
 settings_local.py
 venv/
 
+db.sqlite3
