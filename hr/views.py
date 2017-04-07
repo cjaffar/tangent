@@ -1,7 +1,7 @@
 from django.contrib.auth import authenticate, login
 from django.views.generic import View
 
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 
 from django.http import HttpResponse
 
@@ -11,6 +11,9 @@ from .forms import LoginForm
 class LoginView(View) :
 
 	def get(self, request, *args, **kwargs) :
+
+		if request.user.is_authenticated() :
+			return redirect('employee-view')
 
 		form = LoginForm()
 		return render(request, 'hr/login.html', {'form': form})
@@ -27,9 +30,14 @@ class LoginView(View) :
 			if user is not None:
 				if user.is_active:
 					login(request, user)
-					return HttpResponse('Authenticated successfully')
+					return redirect('employee-view')
 				else:
 					return HttpResponse('Disabled account')
 
 			else:
 				return HttpResponse('Invalid login')
+
+class EmployeeView(View) :
+
+	def get(self, request, *args, **kwargs) :
+		return HttpResponse('HELLO THERE')

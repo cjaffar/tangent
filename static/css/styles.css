@@ -1,0 +1,26 @@
+body {
+	min-height:100%;
+}
+
+.main-container {
+	width:80%;margin:auto auto;
+	min-height:420px;
+	border:1px solid red;position:relative;
+}
+
+.main-container .header {
+	background:orange;border-bottom:1px solid orange;margin:0 auto;
+}
+
+
+.main-container #content section {
+	padding:1.2em;
+}
+
+footer {
+	position:absolute;bottom:0;width:100%;
+}
+
+footer p {
+	border-top:1px solid orange;padding-top:8px;padding-right:8px;
+}

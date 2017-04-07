@@ -14,28 +14,45 @@
     <meta name="description" content="{% block description %}no description, oops{% endblock %}">
 
     <!-- Disable screen scaling-->
-    <link rel="stylesheet" href="{% static '/styles.min.css' %}" type='text/css'>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" type='text/css'>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" type='text/css'>
 </head>
 
 <body class="">
 
-<div class='main-container'>
+<div class='main-container h-100'>
 
 <header class='header'>
-    
+    <div class='row'>
+        
+        <div class='container'>
+            <div class='col-sm-4'>
+                <h1>Tangent Test</h1>
+            </div>
+            <div class='col-sm-8 text-md-right'></div>
+        </div>
+    </div>
 
 </header>
 
-<div id='content'>
-    
-    {% block content %}{% endblock %}
+<div id='content' class='row align-items-center'>
+    <div class='col-sm-12'>
+    <section class='content-area'>
+        {% block content %}{% endblock %}
+    </section>
+    </div>
 </div>
 
+<footer>
+    <p class='text-right'>
+        &copy; {% now 'Y' %} Tangent Test
+    </p>
+</footer>
 
 </div>
 
     <!-- Javascript main files -->
-    <script src="{{ STATIC_URL}}js/main.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" type='text/javascript'></script>
 
     <!-- Google Analytics: Uncomment and change UA-XXXXX-X to be your site"s ID. -->
     <!--<script>
