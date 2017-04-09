@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 
 from datetime import date
+from dateutil import rrule
+
 from dateutil.relativedelta import relativedelta
 
 from django.contrib.auth.models import User
@@ -8,6 +10,12 @@ from django.contrib.auth.models import User
 from django.db import models
 
 # Create your models here.
+class Employee(models.Model) :
+
+	user=models.OneToOneField(User, on_delete=models.CASCADE)
+	start_date=models.DateField()
+	days_remain=models.IntegerField(default=18)
+
 class Leave(models.Model) :
 
 	STATUS_CHOICES = (
@@ -22,74 +30,60 @@ class Leave(models.Model) :
 	days_of_leave=models.IntegerField()
 	status=models.CharField(max_length=12,choices=STATUS_CHOICES, default='new')
 
+	LEAVE_DAYS_PER_YEAR=18
+	MAXIMUM_ACCUMULATED_DAYS=5
+
+	def save(self, *args, **kwargs) :
+
+		number_of_leavedays=self.get_days_of_leave()
+
+		three_months_ago = date.today() - relativedelta(months=3)
+		if(self.employee.start_date.date() < three_months_ago) :
+			raise ValueError("Your start date is less than 3 months ago.")
+
+		employee_days_taken=self.get_employee_days_taken()
+		if (employee_days_taken + number_of_leavedays) > (self.LEAVE_DAYS_PER_YEAR + self.MAXIMUM_ACCUMULATED_DAYS):
+			raise ValueError("You have exceeded your number of available leave days.")
+
+		#logic missing here for accumulated leave days
+		employee.days_remain = self.LEAVE_DAYS_PER_YEAR - (self.employee.days_remain+number_of_leavedays)
+		employee.save()
+
+		self.days_of_leave=number_of_leavedays
+
+		return super(Leave, self).save(*args, **kwargs)
+
+
 	def approve():
 		self.status='approved'
 		self.save()
 
-class Employee(models.Model) :
+	def get_days_of_leave(self) :
 
-	user=models.OneToOneField(User, on_delete=models.CASCADE)
-	start_date=models.DateField()
-	days_remain=models.IntegerField(default=18)
+		start_date=self.start_date
+		end_date=self.end_date
 
-	LEAVE_DAYS_PER_YEAR=18
-	MAXIMUM_ACCUMULATED_DAYS=5
+		if start_date == None or end_date == None :
+			raise ValueError("No valid start or end leave date found.")
 
-	##admittedly, this logic should not all reside here, but this is a test with limited time on my side!!
-	def save(self, start_date, end_date, *args, **kwargs) :
+		days_off = 5, 6
 
+		workdays = [x for x in range(7) if x not in days_off]
+		days = rrule.rrule(rrule.DAILY, dtstart=start_date, until=end_date,byweekday=workdays)
 
+		return days.count( )
 
-		leave = self.start_leave(start_date, end_date)
-
-		# work out logic for 18 days, 3 months and carry over here.
-		leave_days_available=self.days_remain
-
-		three_months_ago = date.today() - relativedelta(months=3)
-		if(self.start_date.date() < three_months_ago) :
-			raise ValueError("Your start date is less than 3 months ago.")
-
-		total_leave_taken = Leave.objects.filter(employee=self) ##ideally should be a method in Leave model
-
-		##associated logical error. assumes 5 days accumulated for part of year worked.
+	def get_employee_days_taken(self) :
+		
 		months_formula=12
-		total_can_be_taken=self.LEAVE_DAYS_PER_YEAR
 		if(self.start_date() > twelve_months_ago) :
 			months_formula=24
-			total_can_be_taken=self.LEAVE_DAYS_PER_YEAR+self.MAXIMUM_ACCUMULATED_DAYS
 
 		months_formula = date.today() - relativedelta(months=months_formula)
 
 		total_leave_taken = Employee.objects.filter(status='approved').filter(employee=self).filter(start_date__gte=months_formula).aggregate(leave_days=Sum('days_of_leave'))
 		
 		if total_leave_taken['days_of_leave'] != None :
-			leave_days_available=total_can_be_taken-total_leave_taken['days_of_leave']
+			return total_leave_taken['days_of_leave']
 
-		if leave_days_available < 1 :
-			raise ValueError("You have exhausted all your leave days.")
-
-		leave.approve()
-
-		self.days_remain=leave_days_available
-		super(Employee, self).save(*args, **kwargs)
-
-	##workout the weekday calcultation
-	def get_num_days(start_date, end_date) :
-
-		num_days = end_date-start_date
-		return num_days
-
-	def start_leave(start_date, end_date, number_of_days):
-		leave_item=Leave()
-		leave_item.employee=self
-		leave_item.start_date=start_date
-		leave_item.end_date=end_date
-		leave_item.days_of_leave=self.get_num_days(start_date, end_date)
-		leave_item.status='new'
-		leave_item.save()
-
-		return leave_item
-
-
-
-
+		return 0

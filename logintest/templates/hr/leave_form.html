@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block title %}Leave Form{% endblock %}
+
+{% block content %}
+
+<div class='row'>
+<div class=''>
+
+<h2>Fill in your leave form:</h2>
+<form method='post' action='.'>
+
+{% if form.errors %}
+<div class='alert warning'>
+{{form.errors}}
+</div>
+{% endif %}
+
+
+{% if msg %}
+<div class='alert warning'>
+	{{msg}}
+</div>
+{% endif %}
+
+
+{% for field in form %}
+	<div class='row'>
+		<div class='col-sm-12'>
+			{{field}}
+		</div>
+	</div>
+{% endfor %}
+
+{% csrf_token %}
+<input type='submit' value='Send' class='btn' />
+</form>
+</div>
+</div>
+{% endblock %}
